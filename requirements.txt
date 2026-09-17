@@ -1,0 +1,8 @@
+streamlit
+numpy
+pandas
+pillow-heif
+matplotlib
+openpyxl
+sympy
+scipy
