@@ -123,7 +123,7 @@ def image_to_spectrum(
 
 st.markdown(
     "code to generate spectra is adapted from [this repository](https://github.com/nialldeacon/espectrally_for_you)"
-    "\n\n ⚠️ note that these spectra are not scientifically accurate and are intended to encourage people to think spectrally"
+    "\n\n ⚠️ note that these spectra are intended to encourage people to think spectrally and are not scientifically accurate"
 )
 
 uploaded_file = st.file_uploader("upload a photo", type=["jpg", "png", "heic"])
