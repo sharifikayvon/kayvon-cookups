@@ -54,11 +54,16 @@ def extract_params(formula):
     return params
 
 
+def to_python_expr(formula):
+    """Let users write ^ for exponentiation (as in x^2) instead of Python's **."""
+    return formula.replace("^", "**")
+
+
 def make_model_func(formula, params):
     """Build a callable model(x, *args) from a formula string, with args
     bound to `params` in order. Uses eval with no builtins and a locked-down
     namespace (x, the fit parameters, and ALLOWED_FUNCS only)."""
-    compiled = compile(formula, "<model>", "eval")
+    compiled = compile(to_python_expr(formula), "<model>", "eval")
 
     def model(x, *args):
         local_vars = dict(zip(params, args))
@@ -161,8 +166,8 @@ if "xdata" in locals() and "ydata" in locals():
     st.markdown("**fit models**")
     st.caption(
         "Write each model as a function of `x` with your own parameter names, e.g. "
-        "`a*x + b`, `a*sqrt(x) + b`, `a*exp(-b*x)`, `a*sin(b*x + c)`. "
-        "Any letter that isn't `x` is treated as a fit parameter. "
+        "`a*x + b`, `a*x^2 + b*x + c`, `a*sqrt(x) + b`, `a*exp(-b*x)`. "
+        "Use `^` or `**` for exponents. Any letter that isn't `x` is treated as a fit parameter. "
         "Available functions: sqrt, exp, log, log10, log2, sin, cos, tan, "
         "arcsin, arccos, arctan, abs — plus constants pi and e."
     )
