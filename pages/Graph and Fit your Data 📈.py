@@ -156,7 +156,7 @@ if "xdata" in locals() and "ydata" in locals():
             "Write each model as a function of `x` with your own parameter names, e.g. "
             "`a*x + b`, `a*x^2 + b*x + c`, `a*sqrt(x) + b`, `a*exp(-b*x)`. "
             "Any letter that isn't `x` is treated as a fit parameter. "
-            "\nAvailable functions include: sqrt, exp, ln, log, "
+            "\n\nAvailable functions include: sqrt, exp, ln, log, "
             "sin, cos, tan, abs — plus constants pi and e."
         )
 
