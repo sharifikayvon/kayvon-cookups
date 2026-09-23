@@ -9,9 +9,7 @@ import streamlit as st
 from io import BytesIO
 from scipy.ndimage import gaussian_filter1d
 
-st.set_page_config(
-    page_title="Photos to Spectra", page_icon="🌈", layout="centered"
-)
+st.set_page_config(page_title="Photos to Spectra", page_icon="🌈", layout="centered")
 
 st.markdown(
     "<h2 style='text-align: center'>Photos to Spectra 🌈</h2>",
@@ -96,20 +94,25 @@ def image_to_spectrum(
 
     nbins = len(wavelengths)
 
-  
     bin_edges = (wavelengths[:-1] + wavelengths[1:]) / 2.0
     indices = np.searchsorted(bin_edges, wavelengths_tmp)
 
     # This reduces to a per-pixel "color" weight that lands in exactly one bin,
     # plus a per-pixel "white" weight that is identical across every bin.
-    denom = 300.0 - 2.0 * sat_flat  # always in [100, 300], sat in [0,100] -> no div-by-zero
+    denom = (
+        300.0 - 2.0 * sat_flat
+    )  # always in [100, 300], sat in [0,100] -> no div-by-zero
     weight_color = val_flat * sat_flat / (100.0 * denom)
     weight_white = val_flat * (100.0 - sat_flat) * 3.0 / (nbins * 100.0 * denom)
 
-    intensities = np.bincount(indices, weights=weight_color, minlength=nbins).astype(float)
-    intensities += weight_white.sum()  # uniform white contribution, same value added to every bin
+    intensities = np.bincount(indices, weights=weight_color, minlength=nbins).astype(
+        float
+    )
+    intensities += (
+        weight_white.sum()
+    )  # uniform white contribution, same value added to every bin
 
-    dλ = wavelengths[1] - wavelengths[0] 
+    dλ = wavelengths[1] - wavelengths[0]
     sigma_nm = fwhm_nm / 2.3548
     sigma_bins = sigma_nm / dλ
     intensities = gaussian_filter1d(intensities, sigma=sigma_bins, mode="nearest")
@@ -117,27 +120,25 @@ def image_to_spectrum(
 
     return wavelengths, intensities
 
+
 st.markdown(
     "code to generate spectra is adapted from [this repository](https://github.com/nialldeacon/espectrally_for_you)"
+    "\n Note that these spectra are not scientifically accurate and are intended to encourage people to think spectrally"
 )
 
-uploaded_file = st.file_uploader(
-        "upload a photo", type=["jpg", "png", "heic"]
-    )
-
+uploaded_file = st.file_uploader("upload a photo", type=["jpg", "png", "heic"])
 
 
 darkmode = st.checkbox("plot spectrum in dark mode", value=False)
 
 
-
 if uploaded_file is None:
-    st.stop() 
+    st.stop()
 
 image = Image.open(uploaded_file)
-st.image(image, caption=uploaded_file.name, width='stretch')
+st.image(image, caption=uploaded_file.name, width="stretch")
 
-uploaded_file.seek(0)   # reset before image_to_spectrum reads it again
+uploaded_file.seek(0)  # reset before image_to_spectrum reads it again
 
 
 font_path = "static/GoogleSans-Regular.ttf"
@@ -236,16 +237,16 @@ if darkmode:
 wavelengths, intensities = image_to_spectrum(uploaded_file)
 
 fig, ax = plt.subplots(figsize=(20, 8))
-c='k'
+c = "k"
 if darkmode:
-    c='w'
+    c = "w"
 ax.plot(wavelengths, intensities, lw=5, c=c)
 
 ax.set_xlabel(r"Wavelength (nm)")
 ax.set_ylabel(r"Normalized Intensity")
 ax.set_xlim(390, 710)
 ax.set_ylim(-0.04, 1.04)
-ax.grid(True, which='both')
+ax.grid(True, which="both")
 
 # Leave room at the top of the figure for the colorbar band
 fig.subplots_adjust(top=0.88)
@@ -276,4 +277,3 @@ st.download_button(
     file_name=f"spec.png",
     mime="image/png",
 )
-
