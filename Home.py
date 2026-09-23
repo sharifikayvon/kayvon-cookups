@@ -21,6 +21,6 @@ Features include:
 
 Explore the tools using the sidebar on the left. 
 
-Please email me at ksharifi1@gsu.edu with any questions, feedback, or especially web app ideas!
+Please email me at ksharifi1@gsu.edu with any questions, feedback, or especially app ideas!
 
 """)
