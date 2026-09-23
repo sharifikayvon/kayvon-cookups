@@ -377,7 +377,6 @@ ALLOWED_FUNCS = {
     "pi": np.pi,
     "e": np.e,
 }
-RESERVED_NAMES = set(ALLOWED_FUNCS.keys()) | {"x"}
 
 
 def has_valid_xy(x, y):
@@ -391,13 +390,15 @@ def has_valid_xy(x, y):
     )
 
 
-def extract_params(formula):
-    """Any identifier in the formula that isn't x or an allowed function name
-    is treated as a free parameter to fit, in order of first appearance."""
+def extract_params(formula, var_name):
+    """Any identifier in the formula that isn't the independent variable or an
+    allowed function name is treated as a free parameter to fit, in order of
+    first appearance."""
     tokens = re.findall(r"[A-Za-z_][A-Za-z_0-9]*", formula)
+    reserved = set(ALLOWED_FUNCS.keys()) | {var_name}
     params = []
     for t in tokens:
-        if t not in RESERVED_NAMES and t not in params:
+        if t not in reserved and t not in params:
             params.append(t)
     return params
 
@@ -407,15 +408,16 @@ def to_python_expr(formula):
     return formula.replace("^", "**")
 
 
-def make_model_func(formula, params):
+def make_model_func(formula, params, var_name):
     """Build a callable model(x, *args) from a formula string, with args
     bound to `params` in order. Uses eval with no builtins and a locked-down
-    namespace (x, the fit parameters, and ALLOWED_FUNCS only)."""
+    namespace (the independent variable, the fit parameters, and
+    ALLOWED_FUNCS only)."""
     compiled = compile(to_python_expr(formula), "<model>", "eval")
 
     def model(x, *args):
         local_vars = dict(zip(params, args))
-        local_vars["x"] = x
+        local_vars[var_name] = x
         local_vars.update(ALLOWED_FUNCS)
         return eval(compiled, {"__builtins__": {}}, local_vars)
 
@@ -505,10 +507,30 @@ if "xdata" in locals() and "ydata" in locals():
     fit_models = st.checkbox("fit models", value=False)
 
     if fit_models:
+        var_name = st.text_input(
+            "independent variable name",
+            value="x",
+        ).strip()
+
+        if not var_name.isidentifier():
+            st.error(
+                "the independent variable name must be a valid identifier "
+                "(letters, numbers, underscores; can't start with a number)."
+            )
+            var_name = None
+        elif var_name in ALLOWED_FUNCS:
+            st.error(
+                f"'{var_name}' is a reserved function/constant name; "
+                "pick a different independent variable name."
+            )
+            var_name = None
+
         st.caption(
-            "Write each model as a function of `x` with your own parameter names, e.g. "
-            "`a*x + b`, `a*x^2 + b*x + c`, `a*sqrt(x) + b`, `a*exp(-b*x)`. "
-            "Any letter that isn't `x` is treated as a fit parameter. "
+            f"Write each model as a function of `{var_name or '...'}` with your own "
+            f"parameter names, e.g. `a*{var_name or 'x'} + b`, "
+            f"`a*{var_name or 'x'}^2 + b*{var_name or 'x'} + c`, "
+            f"`a*sqrt({var_name or 'x'}) + b`, `a*exp(-b*{var_name or 'x'})`. "
+            f"Any letter that isn't `{var_name or 'x'}` is treated as a fit parameter. "
             "Available functions: sqrt, exp, ln (natural log), log (log base 10), "
             "sin, cos, tan, abs — plus constants pi and e."
         )
@@ -523,7 +545,7 @@ if "xdata" in locals() and "ydata" in locals():
                 value=st.session_state.model_formulas[i],
                 key=f"model_input_{i}",
                 label_visibility="collapsed",
-                placeholder="e.g. a*sqrt(x) + b",
+                placeholder=f"e.g. a*sqrt({var_name or 'x'}) + b",
             )
             if len(st.session_state.model_formulas) > 1:
                 if row_col2.button("remove", key=f"remove_model_{i}"):
@@ -653,7 +675,7 @@ if "xdata" in locals() and "ydata" in locals():
     if flipy:
         ax.invert_yaxis()
 
-    if fit_models and has_valid_xy(xdata, ydata):
+    if fit_models and var_name and has_valid_xy(xdata, ydata):
         x_fit = np.linspace(np.min(xdata), np.max(xdata), 500)
         any_fit_plotted = False
 
@@ -662,7 +684,7 @@ if "xdata" in locals() and "ydata" in locals():
             if not formula:
                 continue
 
-            params = extract_params(formula)
+            params = extract_params(formula, var_name)
             if not params:
                 st.warning(
                     f"model {i + 1} (`{formula}`) has no free parameters to fit."
@@ -670,7 +692,7 @@ if "xdata" in locals() and "ydata" in locals():
                 continue
 
             try:
-                model_func = make_model_func(formula, params)
+                model_func = make_model_func(formula, params, var_name)
                 popt, pcov = curve_fit(
                     model_func, xdata, ydata, p0=np.ones(len(params)), maxfev=10000
                 )
