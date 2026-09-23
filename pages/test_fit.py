@@ -291,7 +291,7 @@ if "xdata" in locals() and "ydata" in locals():
         fit_colors = ["lime", "cyan", "yellow", "magenta", "orange", "white"]
 
     fig, ax = plt.subplots(figsize=(8, 6))
-    ax.scatter(xdata, ydata, s=100, c=c, edgecolors=edgecolors, lw=3, zorder=3)
+    ax.scatter(xdata, ydata, s=100, c=c, edgecolors=edgecolors, lw=2, zorder=3)
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
     ax.set_title(title)
@@ -330,7 +330,7 @@ if "xdata" in locals() and "ydata" in locals():
                 label = f"y = {formula}\n{param_lines}"
 
                 color = fit_colors[i % len(fit_colors)]
-                ax.plot(x_fit, y_fit, color=color, lw=3, label=label)
+                ax.plot(x_fit, y_fit, color=color, lw=2, label=label)
                 any_fit_plotted = True
 
             except Exception as e:
