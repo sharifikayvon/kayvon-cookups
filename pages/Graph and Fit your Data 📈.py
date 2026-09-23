@@ -4,11 +4,27 @@ import numpy as np
 import streamlit as st
 from io import BytesIO
 import pandas as pd
+import re
 from scipy.optimize import curve_fit
 
 st.set_page_config(
     page_title="Graph and Fit your Data", page_icon="📈", layout="centered"
 )
+
+ALLOWED_FUNCS = {
+    "sqrt": np.sqrt,
+    "exp": np.exp,
+    "ln": np.log,
+    "log": np.log10,
+    "log10": np.log10,
+    "sin": np.sin,
+    "cos": np.cos,
+    "tan": np.tan,
+    "abs": np.abs,
+    "pi": np.pi,
+    "e": np.e,
+}
+RESERVED_NAMES = set(ALLOWED_FUNCS.keys()) | {"x"}
 
 
 def has_valid_xy(x, y):
@@ -22,58 +38,43 @@ def has_valid_xy(x, y):
     )
 
 
-def fmt_term(coef, term="", sig=3, tol=1e-8, first=False):
-    """Format a single polynomial term with proper signs, parentheses, and skipping 1 before x^n."""
-    if abs(coef) < tol:
-        return ""
-
-    # Number formatting
-    def _fmt(x):
-        if x == 0:
-            return "0"
-        # Use scientific notation if very small or very large
-        if abs(x) < 1e-4 or abs(x) > 1e4:
-            base, exp = f"{x:.{sig}e}".split("e")
-            return rf"({base}\times 10^{{{int(exp)}}})"
-        return f"{x:.{sig}g}"
-
-    mag = _fmt(abs(coef))
-
-    if term and mag == "1":
-        mag = ""
-
-    if term and (mag.startswith("(") or "e" in mag):
-        mag = f"({mag})"
-
-    body = rf"{mag}{term}"
-
-    if first:
-        return rf"- {body}" if coef < 0 else body
-    else:
-        sign = "-" if coef < 0 else "+"
-        return rf"{sign} {body}"
+def extract_params(formula):
+    """Any identifier in the formula that isn't x or an allowed function name
+    is treated as a free parameter to fit, in order of first appearance."""
+    tokens = re.findall(r"[A-Za-z_][A-Za-z_0-9]*", formula)
+    params = []
+    for t in tokens:
+        if t not in RESERVED_NAMES and t not in params:
+            params.append(t)
+    return params
 
 
-def fmt_poly(coeffs, terms, sig=4, tol=1e-8):
-    """
-    Format a polynomial from lists of coefficients and term strings.
+def to_python_expr(formula):
+    """Let users write ^ for exponentiation (as in x^2) instead of Python's **."""
+    return formula.replace("^", "**")
 
-    coeffs : list or array of coefficients [a_n, a_{n-1}, ..., a0]
-    terms  : list of term strings ['x^2', 'x', ''] etc.
-    """
-    # find first non-zero coefficient
-    first_idx = next((i for i, c in enumerate(coeffs) if abs(c) >= tol), None)
-    if first_idx is None:
+
+def make_model_func(formula, params):
+    """Build a callable model(x, *args) from a formula string, with args
+    bound to `params` in order. Uses eval with no builtins and a locked-down
+    namespace (x, the fit parameters, and ALLOWED_FUNCS only)."""
+    compiled = compile(to_python_expr(formula), "<model>", "eval")
+
+    def model(x, *args):
+        local_vars = dict(zip(params, args))
+        local_vars["x"] = x
+        local_vars.update(ALLOWED_FUNCS)
+        return eval(compiled, {"__builtins__": {}}, local_vars)
+
+    return model
+
+
+def fmt_value(v, sig=5):
+    if v == 0:
         return "0"
-
-    parts = []
-    for i, (c, t) in enumerate(zip(coeffs, terms)):
-        is_first = i == first_idx
-        parts.append(fmt_term(c, t, sig=sig, tol=tol, first=is_first))
-
-    return "".join(parts)
-
-
+    if abs(v) < 1e-4 or abs(v) > 1e4:
+        return f"{v:.{sig - 1}e}"
+    return f"{v:.{sig}g}"
 
 
 st.markdown(
@@ -100,7 +101,6 @@ if mode == "upload data file":
         else:
             df = pd.read_csv(uploaded_file, sep=",")
         preview = st.checkbox("preview data", value=False)
-        # st.write("Preview:")
         if preview:
             st.dataframe(df.head(), hide_index=True)
 
@@ -143,16 +143,45 @@ if "xdata" in locals() and "ydata" in locals():
     xlabel = col1.text_input("x label:", "x axis")
     ylabel = col2.text_input("y label:", "y axis")
 
-    col1, col2, col3, col4, col5 = st.columns(5)
-    fitline = col3.checkbox("linear fit", value=False)
-    fitquad = col4.checkbox("quadratic fit", value=False)
-    darkmode = col5.checkbox("dark mode", value=False)
+    col1, col2, col3 = st.columns(3)
+    darkmode = col1.checkbox("dark mode", value=False)
     flipx = col2.checkbox("flip x axis", value=False)
-    flipy = col1.checkbox("flip y axis", value=False)
-    force_origin = False
+    flipy = col3.checkbox("flip y axis", value=False)
 
-    if fitline:
-        force_origin = st.checkbox("set linear fit y-intercept to 0", value=False)
+    st.markdown("---")
+    fit_models = st.checkbox("fit models", value=False)
+
+    if fit_models:
+        st.caption(
+            "Write each model as a function of `x` with your own parameter names, e.g. "
+            "`a*x + b`, `a*x^2 + b*x + c`, `a*sqrt(x) + b`, `a*exp(-b*x)`. "
+            "Any letter that isn't `x` is treated as a fit parameter. "
+            "Available functions: sqrt, exp, ln, log, "
+            "sin, cos, tan, abs — plus constants pi and e."
+        )
+
+        if "model_formulas" not in st.session_state:
+            st.session_state.model_formulas = ["a*x + b"]
+
+        for i in range(len(st.session_state.model_formulas)):
+            row_col1, row_col2 = st.columns([6, 1])
+            st.session_state.model_formulas[i] = row_col1.text_input(
+                f"model {i + 1}",
+                value=st.session_state.model_formulas[i],
+                key=f"model_input_{i}",
+                label_visibility="collapsed",
+                placeholder="e.g. a*sqrt(x) + b",
+            )
+            if len(st.session_state.model_formulas) > 1:
+                if row_col2.button("remove", key=f"remove_model_{i}"):
+                    st.session_state.model_formulas.pop(i)
+                    st.rerun()
+
+        if st.button("add model"):
+            st.session_state.model_formulas.append("")
+            st.rerun()
+
+    st.markdown("---")
 
     font_path = "static/GoogleSans-Regular.ttf"
     mpl.font_manager.fontManager.addfont(font_path)
@@ -222,8 +251,14 @@ if "xdata" in locals() and "ydata" in locals():
 
     c = "k"
     edgecolors = "gainsboro"
-    c1 = "dodgerblue"
-    c2 = "orangered"
+    fit_colors = [
+        "dodgerblue",
+        "orangered",
+        "limegreen",
+        "gold",
+        "mediumorchid",
+        "deepskyblue",
+    ]
 
     if darkmode:
         mpl.rcParams.update(
@@ -252,11 +287,10 @@ if "xdata" in locals() and "ydata" in locals():
         )
         c = "gainsboro"
         edgecolors = "w"
-        c1 = "lime"
-        c2 = "cyan"
+        fit_colors = ["lime", "cyan", "yellow", "magenta", "orange", "white"]
 
     fig, ax = plt.subplots(figsize=(8, 6))
-    ax.scatter(xdata, ydata, s=100, c=c, edgecolors=edgecolors, lw=3)
+    ax.scatter(xdata, ydata, s=60, c=c, edgecolors=edgecolors, lw=1, zorder=3)
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
     ax.set_title(title)
@@ -266,43 +300,43 @@ if "xdata" in locals() and "ydata" in locals():
     if flipy:
         ax.invert_yaxis()
 
-    if fitline and has_valid_xy(xdata, ydata):
+    if fit_models and has_valid_xy(xdata, ydata):
+        x_fit = np.linspace(np.min(xdata), np.max(xdata), 500)
+        any_fit_plotted = False
 
-        if force_origin:
-            m = np.dot(xdata, ydata) / np.dot(xdata, xdata)
+        for i, formula in enumerate(st.session_state.model_formulas):
+            formula = formula.strip()
+            if not formula:
+                continue
 
-            x_min = np.min(xdata)
-            x_max = np.max(xdata)
-            lin_xfit = np.array([x_min, x_max])
-            lin_yfit = m * lin_xfit
+            params = extract_params(formula)
+            if not params:
+                st.warning(
+                    f"model {i + 1} (`{formula}`) has no free parameters to fit."
+                )
+                continue
 
-            lin_label = rf"$linear\ fit:\ y = {fmt_term(m, 'x', first=True)}$"
+            try:
+                model_func = make_model_func(formula, params)
+                popt, pcov = curve_fit(
+                    model_func, xdata, ydata, p0=np.ones(len(params)), maxfev=10000
+                )
+                y_fit = model_func(x_fit, *popt)
 
-        else:
-            lin_coeffs = np.polyfit(xdata, ydata, 1)
-            lin_xfit = np.linspace(np.min(xdata), np.max(xdata), 500)
-            lin_yfit = np.polyval(lin_coeffs, lin_xfit)
+                param_lines = "\n".join(
+                    f"{name} = {fmt_value(val)}" for name, val in zip(params, popt)
+                )
+                label = f"y = {formula}\n{param_lines}"
 
-            lin_label = rf"$linear\ fit:\ y = {fmt_poly(lin_coeffs, ['x',''])}$"
+                color = fit_colors[i % len(fit_colors)]
+                ax.plot(x_fit, y_fit, color=color, lw=2, label=label)
+                any_fit_plotted = True
 
-        ax.plot(lin_xfit, lin_yfit, color=c1, linestyle="solid", label=lin_label, lw=3)
-        ax.legend()
+            except Exception as e:
+                st.warning(f"could not fit model {i + 1} (`{formula}`): {e}")
 
-    elif fitline:
-        st.warning("cannot fit line: data is empty or invalid")
-
-    if fitquad and has_valid_xy(xdata, ydata):
-        quad_coeffs = np.polyfit(xdata, ydata, 2)
-        quad_xfit = np.linspace(np.min(xdata), np.max(xdata), 500)
-        quad_yfit = np.polyval(quad_coeffs, quad_xfit)
-        quad_label = rf"$quadratic\ fit:\ y = {fmt_poly(quad_coeffs, ['x^2','x',''])}$"
-        ax.plot(
-            quad_xfit, quad_yfit, color=c2, linestyle="dashed", label=quad_label, lw=3
-        )
-        ax.legend()
-
-    elif fitquad:
-        st.warning("cannot fit parabola: data is empty or invalid")
+        if any_fit_plotted:
+            ax.legend(fontsize=10, labelspacing=1.2, loc="best", framealpha=0.8)
 
     st.pyplot(fig)
 
