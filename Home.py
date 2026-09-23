@@ -12,7 +12,7 @@ st.markdown(
 )
 
 st.markdown("""
-Welcome to my collection of web apps!
+Welcome to my collection of web apps 🤠 !
 
 Features include:
 - **Graph and Fit your Data**: Make a scatter plot of your data and fit a linear, quadratic, or user-specified function.
