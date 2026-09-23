@@ -121,159 +121,157 @@ def image_to_spectrum(
     return wavelengths, intensities
 
 
-st.markdown(
-    "code to generate spectra is adapted from [this repository](https://github.com/nialldeacon/espectrally_for_you)"
-    "\n\n ⚠️ note that these spectra are intended to encourage people to think spectrally and are not scientifically accurate"
-)
-
 uploaded_file = st.file_uploader("upload a photo", type=["jpg", "png", "heic"])
 
 
 darkmode = st.checkbox("plot spectrum in dark mode", value=False)
 
 
-if uploaded_file is None:
-    st.stop()
+if uploaded_file is not None:
 
-image = Image.open(uploaded_file)
-st.image(image, caption=uploaded_file.name, width="stretch")
+    image = Image.open(uploaded_file)
+    st.image(image, caption=uploaded_file.name, width="stretch")
 
-uploaded_file.seek(0)  # reset before image_to_spectrum reads it again
+    uploaded_file.seek(0)  # reset before image_to_spectrum reads it again
 
+    font_path = "static/GoogleSans-Regular.ttf"
+    mpl.font_manager.fontManager.addfont(font_path)
+    font_prop = mpl.font_manager.FontProperties(fname=font_path)
+    plt.rcParams["font.family"] = font_prop.get_name()
 
-font_path = "static/GoogleSans-Regular.ttf"
-mpl.font_manager.fontManager.addfont(font_path)
-font_prop = mpl.font_manager.FontProperties(fname=font_path)
-plt.rcParams["font.family"] = font_prop.get_name()
-
-mpl.rcParams.update(
-    {
-        "figure.dpi": 200,
-        "figure.facecolor": "white",
-        "figure.edgecolor": "white",
-        "savefig.dpi": 300,
-        "savefig.format": "png",
-        "savefig.bbox": "tight",
-        "savefig.facecolor": "white",
-        "savefig.edgecolor": "white",
-        "figure.autolayout": True,
-        "axes.facecolor": "white",
-        "axes.edgecolor": "black",
-        "axes.linewidth": 1.2,
-        "axes.labelcolor": "black",
-        "axes.labelsize": 28,
-        "axes.titlesize": 28,
-        "axes.titlecolor": "black",
-        "axes.spines.top": True,
-        "axes.spines.right": True,
-        "axes.grid": True,
-        "grid.color": "black",
-        "grid.linewidth": 0.4,
-        "grid.alpha": 0.8,
-        "xtick.top": True,
-        "ytick.right": True,
-        "xtick.direction": "in",
-        "ytick.direction": "in",
-        "xtick.major.size": 6,
-        "ytick.major.size": 6,
-        "xtick.major.width": 1.2,
-        "ytick.major.width": 1.2,
-        "xtick.minor.visible": True,
-        "ytick.minor.visible": True,
-        "xtick.minor.size": 3,
-        "ytick.minor.size": 3,
-        "xtick.minor.width": 1,
-        "ytick.minor.width": 1,
-        "xtick.color": "black",
-        "ytick.color": "black",
-        "xtick.labelcolor": "black",
-        "ytick.labelcolor": "black",
-        "xtick.labelsize": 24,
-        "ytick.labelsize": 24,
-        "xtick.minor.ndivs": 5,
-        "ytick.minor.ndivs": 5,
-        "lines.linewidth": 1.5,
-        "lines.markersize": 5,
-        "lines.color": "black",
-        "mathtext.default": "regular",
-        "legend.frameon": True,
-        "legend.fontsize": 12,
-        "legend.handlelength": 2,
-        "legend.labelcolor": "black",
-        "legend.facecolor": "white",
-        "legend.edgecolor": "black",
-        "legend.fancybox": True,
-        "legend.framealpha": 1.0,
-    }
-)
-
-if darkmode:
     mpl.rcParams.update(
         {
-            "figure.facecolor": "black",
-            "figure.edgecolor": "black",
-            "savefig.facecolor": "black",
-            "savefig.edgecolor": "black",
-            "axes.facecolor": "black",
-            "axes.edgecolor": "white",
-            "axes.labelcolor": "white",
-            "axes.titlecolor": "white",
-            "grid.color": "snow",
+            "figure.dpi": 200,
+            "figure.facecolor": "white",
+            "figure.edgecolor": "white",
+            "savefig.dpi": 300,
+            "savefig.format": "png",
+            "savefig.bbox": "tight",
+            "savefig.facecolor": "white",
+            "savefig.edgecolor": "white",
+            "figure.autolayout": True,
+            "axes.facecolor": "white",
+            "axes.edgecolor": "black",
+            "axes.linewidth": 1.2,
+            "axes.labelcolor": "black",
+            "axes.labelsize": 28,
+            "axes.titlesize": 28,
+            "axes.titlecolor": "black",
+            "axes.spines.top": True,
+            "axes.spines.right": True,
+            "axes.grid": True,
+            "grid.color": "black",
             "grid.linewidth": 0.4,
             "grid.alpha": 0.8,
-            "xtick.color": "white",
-            "ytick.color": "white",
-            "xtick.labelcolor": "white",
-            "ytick.labelcolor": "white",
-            "lines.color": "white",
+            "xtick.top": True,
+            "ytick.right": True,
+            "xtick.direction": "in",
+            "ytick.direction": "in",
+            "xtick.major.size": 6,
+            "ytick.major.size": 6,
+            "xtick.major.width": 1.2,
+            "ytick.major.width": 1.2,
+            "xtick.minor.visible": True,
+            "ytick.minor.visible": True,
+            "xtick.minor.size": 3,
+            "ytick.minor.size": 3,
+            "xtick.minor.width": 1,
+            "ytick.minor.width": 1,
+            "xtick.color": "black",
+            "ytick.color": "black",
+            "xtick.labelcolor": "black",
+            "ytick.labelcolor": "black",
+            "xtick.labelsize": 24,
+            "ytick.labelsize": 24,
+            "xtick.minor.ndivs": 5,
+            "ytick.minor.ndivs": 5,
+            "lines.linewidth": 1.5,
+            "lines.markersize": 5,
+            "lines.color": "black",
             "mathtext.default": "regular",
-            "legend.labelcolor": "white",
-            "legend.facecolor": "black",
-            "legend.edgecolor": "white",
+            "legend.frameon": True,
+            "legend.fontsize": 12,
+            "legend.handlelength": 2,
+            "legend.labelcolor": "black",
+            "legend.facecolor": "white",
+            "legend.edgecolor": "black",
+            "legend.fancybox": True,
+            "legend.framealpha": 1.0,
         }
     )
 
+    if darkmode:
+        mpl.rcParams.update(
+            {
+                "figure.facecolor": "black",
+                "figure.edgecolor": "black",
+                "savefig.facecolor": "black",
+                "savefig.edgecolor": "black",
+                "axes.facecolor": "black",
+                "axes.edgecolor": "white",
+                "axes.labelcolor": "white",
+                "axes.titlecolor": "white",
+                "grid.color": "snow",
+                "grid.linewidth": 0.4,
+                "grid.alpha": 0.8,
+                "xtick.color": "white",
+                "ytick.color": "white",
+                "xtick.labelcolor": "white",
+                "ytick.labelcolor": "white",
+                "lines.color": "white",
+                "mathtext.default": "regular",
+                "legend.labelcolor": "white",
+                "legend.facecolor": "black",
+                "legend.edgecolor": "white",
+            }
+        )
 
-wavelengths, intensities = image_to_spectrum(uploaded_file)
+    wavelengths, intensities = image_to_spectrum(uploaded_file)
 
-fig, ax = plt.subplots(figsize=(20, 8))
-c = "k"
-if darkmode:
-    c = "w"
-ax.plot(wavelengths, intensities, lw=5, c=c)
+    fig, ax = plt.subplots(figsize=(20, 8))
+    c = "k"
+    if darkmode:
+        c = "w"
+    ax.plot(wavelengths, intensities, lw=5, c=c)
 
-ax.set_xlabel(r"Wavelength (nm)")
-ax.set_ylabel(r"Normalized Intensity")
-ax.set_xlim(390, 710)
-ax.set_ylim(-0.04, 1.04)
-ax.grid(True, which="both")
+    ax.set_xlabel(r"Wavelength (nm)")
+    ax.set_ylabel(r"Normalized Intensity")
+    ax.set_xlim(390, 710)
+    ax.set_ylim(-0.04, 1.04)
+    ax.grid(True, which="both")
 
-# Leave room at the top of the figure for the colorbar band
-fig.subplots_adjust(top=0.88)
+    # Leave room at the top of the figure for the colorbar band
+    fig.subplots_adjust(top=0.88)
 
-# Force a draw so get_position() reflects the actual final layout
-fig.canvas.draw()
+    # Force a draw so get_position() reflects the actual final layout
+    fig.canvas.draw()
 
-pos = ax.get_position()
-cax = fig.add_axes([pos.x0, pos.y1 + 0.02, pos.width, pos.height * 0.05])
+    pos = ax.get_position()
+    cax = fig.add_axes([pos.x0, pos.y1 + 0.02, pos.width, pos.height * 0.05])
 
-norm = mpl.colors.Normalize(vmin=wavelengths.min(), vmax=wavelengths.max())
-sm = mpl.cm.ScalarMappable(cmap="turbo", norm=norm)
-sm.set_array([])
+    norm = mpl.colors.Normalize(vmin=wavelengths.min(), vmax=wavelengths.max())
+    sm = mpl.cm.ScalarMappable(cmap="turbo", norm=norm)
+    sm.set_array([])
 
-cbar = fig.colorbar(sm, cax=cax, orientation="horizontal")
-cbar.set_ticks([])
-cbar.ax.set_xticklabels([])
+    cbar = fig.colorbar(sm, cax=cax, orientation="horizontal")
+    cbar.set_ticks([])
+    cbar.ax.set_xticklabels([])
 
-st.pyplot(fig)
+    st.pyplot(fig)
 
-buf = BytesIO()
-fig.savefig(buf, format="png")
-buf.seek(0)
+    buf = BytesIO()
+    fig.savefig(buf, format="png")
+    buf.seek(0)
 
-st.download_button(
-    label="download spectrum",
-    data=buf,
-    file_name=f"spec.png",
-    mime="image/png",
+    st.download_button(
+        label="download spectrum",
+        data=buf,
+        file_name=f"spec.png",
+        mime="image/png",
+    )
+
+
+st.markdown(
+    "code to generate spectra is adapted from [this repository](https://github.com/nialldeacon/espectrally_for_you)"
+    "\n\n ⚠️ note that these spectra are intended to encourage people to think spectrally and are not scientifically accurate"
 )
