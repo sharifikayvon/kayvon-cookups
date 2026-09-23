@@ -323,7 +323,7 @@ if "xdata" in locals() and "ydata" in locals():
                 y_fit = model_func(x_fit, *popt)
 
                 param_lines = "\n".join(
-                    f"    {name} = {fmt_value(val)}" for name, val in zip(params, popt)
+                    f"{name} = {fmt_value(val)}" for name, val in zip(params, popt)
                 )
                 label = f"y = {formula}\n{param_lines}"
 
