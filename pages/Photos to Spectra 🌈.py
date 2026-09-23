@@ -12,7 +12,7 @@ from scipy.ndimage import gaussian_filter1d
 st.set_page_config(page_title="Photos to Spectra", page_icon="🌈", layout="centered")
 
 st.markdown(
-    "<h2 style='text-align: center'>Photos to Spectra 🌈</h2>",
+    "<h1 style='text-align: center'>Photos to Spectra 🌈</h1>",
     unsafe_allow_html=True,
 )
 register_heif_opener()
