@@ -273,5 +273,5 @@ if uploaded_file is not None:
 
 st.markdown(
     "code to generate spectra is adapted from [this repository](https://github.com/nialldeacon/espectrally_for_you)"
-    "\n\n ⚠️ note that these spectra are intended to encourage people to think spectrally and are not scientifically accurate"
+    "\n\n ⚠️ note that generated spectra are not scientifically accurate and only intended to encourage people to think spectrally"
 )
