@@ -18,13 +18,9 @@ ALLOWED_FUNCS = {
     "ln": np.log,
     "log": np.log10,
     "log10": np.log10,
-    "log2": np.log2,
     "sin": np.sin,
     "cos": np.cos,
     "tan": np.tan,
-    "arcsin": np.arcsin,
-    "arccos": np.arccos,
-    "arctan": np.arctan,
     "abs": np.abs,
     "pi": np.pi,
     "e": np.e,
@@ -74,7 +70,7 @@ def make_model_func(formula, params):
     return model
 
 
-def fmt_value(v, sig=4):
+def fmt_value(v, sig=5):
     if v == 0:
         return "0"
     if abs(v) < 1e-4 or abs(v) > 1e4:
@@ -158,9 +154,9 @@ if "xdata" in locals() and "ydata" in locals():
     st.caption(
         "Write each model as a function of `x` with your own parameter names, e.g. "
         "`a*x + b`, `a*x^2 + b*x + c`, `a*sqrt(x) + b`, `a*exp(-b*x)`. "
-        "Use `^` or `**` for exponents. Any letter that isn't `x` is treated as a fit parameter. "
+        "Any letter that isn't `x` is treated as a fit parameter. "
         "Available functions: sqrt, exp, ln (natural log), log (log base 10), "
-        "log10, log2, sin, cos, tan, arcsin, arccos, arctan, abs — plus constants pi and e."
+        "sin, cos, tan, abs — plus constants pi and e."
     )
 
     if "model_formulas" not in st.session_state:
@@ -329,7 +325,7 @@ if "xdata" in locals() and "ydata" in locals():
                 param_lines = "\n".join(
                     f"    {name} = {fmt_value(val)}" for name, val in zip(params, popt)
                 )
-                label = f"model {i + 1}: y = {formula}\n{param_lines}"
+                label = f"y = {formula}\n{param_lines}"
 
                 color = fit_colors[i % len(fit_colors)]
                 ax.plot(x_fit, y_fit, color=color, lw=3, label=label)
