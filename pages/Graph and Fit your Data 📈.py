@@ -251,69 +251,71 @@ if darkmode:
     c1 = "lime"
     c2 = "cyan"
 
-if "xdata" not in locals() and "ydata" not in locals():
-    xdata = np.empty(1)  # np.arange(-3 * np.pi, 3 * np.pi, 0.05)
-    ydata = np.empty(1)  # np.sin(-0.5 * xdata) + np.random.normal(0, 0.15, len(xdata))
+# if "xdata" not in locals() and "ydata" not in locals():
+#     xdata = np.arange(-3 * np.pi, 3 * np.pi, 0.05)
+#     ydata = np.sin(-0.5 * xdata) + np.random.normal(0, 0.15, len(xdata))
 
+if "xdata" in locals() and "ydata" in locals():
 
-fig, ax = plt.subplots(figsize=(8, 6))
-ax.scatter(xdata, ydata, s=100, c=c, edgecolors=edgecolors, lw=3)
-ax.set_xlabel(xlabel)
-ax.set_ylabel(ylabel)
-ax.set_title(title)
-ax.grid(True, which="both")
-if flipx:
-    ax.invert_xaxis()
-if flipy:
-    ax.invert_yaxis()
+    fig, ax = plt.subplots(figsize=(8, 6))
+    ax.scatter(xdata, ydata, s=100, c=c, edgecolors=edgecolors, lw=3)
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
+    ax.set_title(title)
+    ax.grid(True, which="both")
+    if flipx:
+        ax.invert_xaxis()
+    if flipy:
+        ax.invert_yaxis()
 
-if fitline and has_valid_xy(xdata, ydata):
+    if fitline and has_valid_xy(xdata, ydata):
 
-    if force_origin:
-        # constrained fit through (0,0)
-        m = np.dot(xdata, ydata) / np.dot(xdata, xdata)
+        if force_origin:
+            # constrained fit through (0,0)
+            m = np.dot(xdata, ydata) / np.dot(xdata, xdata)
 
-        x_min = np.min(xdata)
-        x_max = np.max(xdata)
-        lin_xfit = np.array([x_min, x_max])
-        lin_yfit = m * lin_xfit
+            x_min = np.min(xdata)
+            x_max = np.max(xdata)
+            lin_xfit = np.array([x_min, x_max])
+            lin_yfit = m * lin_xfit
 
-        lin_label = rf"$linear\ fit:\ y = {fmt_term(m, 'x', first=True)}$"
+            lin_label = rf"$linear\ fit:\ y = {fmt_term(m, 'x', first=True)}$"
 
-    else:
-        lin_coeffs = np.polyfit(xdata, ydata, 1)
-        lin_xfit = np.linspace(np.min(xdata), np.max(xdata), 500)
-        lin_yfit = np.polyval(lin_coeffs, lin_xfit)
+        else:
+            lin_coeffs = np.polyfit(xdata, ydata, 1)
+            lin_xfit = np.linspace(np.min(xdata), np.max(xdata), 500)
+            lin_yfit = np.polyval(lin_coeffs, lin_xfit)
 
-        lin_label = rf"$linear\ fit:\ y = {fmt_poly(lin_coeffs, ['x',''])}$"
+            lin_label = rf"$linear\ fit:\ y = {fmt_poly(lin_coeffs, ['x',''])}$"
 
-    ax.plot(lin_xfit, lin_yfit, color=c1, linestyle="solid", label=lin_label, lw=3)
-    ax.legend()
+        ax.plot(lin_xfit, lin_yfit, color=c1, linestyle="solid", label=lin_label, lw=3)
+        ax.legend()
 
-elif fitline:
-    st.warning("cannot fit line: data is empty or invalid")
+    elif fitline:
+        st.warning("cannot fit line: data is empty or invalid")
 
-if fitquad and has_valid_xy(xdata, ydata):
-    quad_coeffs = np.polyfit(xdata, ydata, 2)
-    quad_xfit = np.linspace(np.min(xdata), np.max(xdata), 500)
-    quad_yfit = np.polyval(quad_coeffs, quad_xfit)
-    quad_label = rf"$quadratic\ fit:\ y = {fmt_poly(quad_coeffs, ['x^2','x',''])}$"
-    ax.plot(quad_xfit, quad_yfit, color=c2, linestyle="dashed", label=quad_label, lw=3)
-    ax.legend()
+    if fitquad and has_valid_xy(xdata, ydata):
+        quad_coeffs = np.polyfit(xdata, ydata, 2)
+        quad_xfit = np.linspace(np.min(xdata), np.max(xdata), 500)
+        quad_yfit = np.polyval(quad_coeffs, quad_xfit)
+        quad_label = rf"$quadratic\ fit:\ y = {fmt_poly(quad_coeffs, ['x^2','x',''])}$"
+        ax.plot(
+            quad_xfit, quad_yfit, color=c2, linestyle="dashed", label=quad_label, lw=3
+        )
+        ax.legend()
 
-elif fitquad:
-    st.warning("cannot fit parabola: data is empty or invalid")
+    elif fitquad:
+        st.warning("cannot fit parabola: data is empty or invalid")
 
+    st.pyplot(fig)
 
-st.pyplot(fig)
+    buf = BytesIO()
+    fig.savefig(buf, format="png")
+    buf.seek(0)
 
-buf = BytesIO()
-fig.savefig(buf, format="png")
-buf.seek(0)
-
-st.download_button(
-    label="download graph",
-    data=buf,
-    file_name=f"{title.replace(' ', '_')}.png",
-    mime="image/png",
-)
+    st.download_button(
+        label="download graph",
+        data=buf,
+        file_name=f"{title.replace(' ', '_')}.png",
+        mime="image/png",
+    )
