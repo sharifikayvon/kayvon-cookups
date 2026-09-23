@@ -143,10 +143,12 @@ if "xdata" in locals() and "ydata" in locals():
     xlabel = col1.text_input("x label:", "x axis")
     ylabel = col2.text_input("y label:", "y axis")
 
-    col1, col2, col3 = st.columns(3)
+    col1, col2, col3, col4, col5 = st.columns(5)
     darkmode = col1.checkbox("dark mode", value=False)
     flipx = col2.checkbox("flip x axis", value=False)
     flipy = col3.checkbox("flip y axis", value=False)
+    logx = col4.checkbox("log x axis", value=False)
+    logy = col5.checkbox("log y axis", value=False)
 
     st.markdown("---")
     fit_models = st.checkbox("fit models", value=False)
@@ -299,6 +301,10 @@ if "xdata" in locals() and "ydata" in locals():
         ax.invert_xaxis()
     if flipy:
         ax.invert_yaxis()
+    if logx:
+        ax.set_xscale("log")
+    if logy:
+        ax.set_yscale("log")
 
     if fit_models and has_valid_xy(xdata, ydata):
         x_fit = np.linspace(np.min(xdata), np.max(xdata), 500)
