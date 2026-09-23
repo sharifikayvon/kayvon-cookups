@@ -689,7 +689,7 @@ if "xdata" in locals() and "ydata" in locals():
                 st.warning(f"could not fit model {i + 1} (`{formula}`): {e}")
 
         if any_fit_plotted:
-            ax.legend(fontsize=9, labelspacing=1.2, loc="best", framealpha=.6)
+            ax.legend(fontsize=9, labelspacing=1.2, loc="best", framealpha=.8)
 
     st.pyplot(fig)
 
