@@ -132,130 +132,125 @@ elif mode == "manually enter data":
         st.stop()
 
 
-title = st.text_input("plot title:", "title")
+if "xdata" in locals() and "ydata" in locals():
 
-col1, col2 = st.columns(2)
-xlabel = col1.text_input("x label:", "x axis")
-ylabel = col2.text_input("y label:", "y axis")
+    title = st.text_input("plot title:", "title")
 
+    col1, col2 = st.columns(2)
+    xlabel = col1.text_input("x label:", "x axis")
+    ylabel = col2.text_input("y label:", "y axis")
 
-col1, col2, col3, col4, col5 = st.columns(5)
-fitline = col3.checkbox("linear fit", value=False)
-fitquad = col4.checkbox("quadratic fit", value=False)
-darkmode = col5.checkbox("dark mode", value=False)
-flipx = col2.checkbox("flip x axis", value=False)
-flipy = col1.checkbox("flip y axis", value=False)
-force_origin = False
+    col1, col2, col3, col4, col5 = st.columns(5)
+    fitline = col3.checkbox("linear fit", value=False)
+    fitquad = col4.checkbox("quadratic fit", value=False)
+    darkmode = col5.checkbox("dark mode", value=False)
+    flipx = col2.checkbox("flip x axis", value=False)
+    flipy = col1.checkbox("flip y axis", value=False)
+    force_origin = False
 
-if fitline:
-    force_origin = st.checkbox("set linear fit y-intercept to 0", value=False)
+    if fitline:
+        force_origin = st.checkbox("set linear fit y-intercept to 0", value=False)
 
-font_path = "static/GoogleSans-Regular.ttf"
-mpl.font_manager.fontManager.addfont(font_path)
-font_prop = mpl.font_manager.FontProperties(fname=font_path)
-plt.rcParams["font.family"] = font_prop.get_name()
+    font_path = "static/GoogleSans-Regular.ttf"
+    mpl.font_manager.fontManager.addfont(font_path)
+    font_prop = mpl.font_manager.FontProperties(fname=font_path)
+    plt.rcParams["font.family"] = font_prop.get_name()
 
-mpl.rcParams.update(
-    {
-        "figure.dpi": 200,
-        "figure.facecolor": "white",
-        "figure.edgecolor": "white",
-        "savefig.dpi": 300,
-        "savefig.format": "png",
-        "savefig.bbox": "tight",
-        "savefig.facecolor": "white",
-        "savefig.edgecolor": "white",
-        "figure.autolayout": True,
-        "axes.facecolor": "white",
-        "axes.edgecolor": "black",
-        "axes.linewidth": 1.2,
-        "axes.labelcolor": "black",
-        "axes.labelsize": 20,
-        "axes.titlesize": 20,
-        "axes.titlecolor": "black",
-        "axes.spines.top": True,
-        "axes.spines.right": True,
-        "axes.grid": True,
-        "grid.color": "black",
-        "grid.linewidth": 0.4,
-        "grid.alpha": 0.8,
-        "xtick.top": True,
-        "ytick.right": True,
-        "xtick.direction": "in",
-        "ytick.direction": "in",
-        "xtick.major.size": 6,
-        "ytick.major.size": 6,
-        "xtick.major.width": 1.2,
-        "ytick.major.width": 1.2,
-        "xtick.minor.visible": True,
-        "ytick.minor.visible": True,
-        "xtick.minor.size": 3,
-        "ytick.minor.size": 3,
-        "xtick.minor.width": 1,
-        "ytick.minor.width": 1,
-        "xtick.color": "black",
-        "ytick.color": "black",
-        "xtick.labelcolor": "black",
-        "ytick.labelcolor": "black",
-        "xtick.labelsize": 16,
-        "ytick.labelsize": 16,
-        "xtick.minor.ndivs": 5,
-        "ytick.minor.ndivs": 5,
-        "lines.linewidth": 1.5,
-        "lines.markersize": 5,
-        "lines.color": "black",
-        "mathtext.default": "regular",
-        "legend.frameon": True,
-        "legend.fontsize": 12,
-        "legend.handlelength": 2,
-        "legend.labelcolor": "black",
-        "legend.facecolor": "white",
-        "legend.edgecolor": "black",
-        "legend.fancybox": True,
-        "legend.framealpha": 1.0,
-    }
-)
-
-c = "k"
-edgecolors = "gainsboro"
-c1 = "dodgerblue"
-c2 = "orangered"
-
-if darkmode:
     mpl.rcParams.update(
         {
-            "figure.facecolor": "black",
-            "figure.edgecolor": "black",
-            "savefig.facecolor": "black",
-            "savefig.edgecolor": "black",
-            "axes.facecolor": "black",
-            "axes.edgecolor": "white",
-            "axes.labelcolor": "white",
-            "axes.titlecolor": "white",
-            "grid.color": "snow",
+            "figure.dpi": 200,
+            "figure.facecolor": "white",
+            "figure.edgecolor": "white",
+            "savefig.dpi": 300,
+            "savefig.format": "png",
+            "savefig.bbox": "tight",
+            "savefig.facecolor": "white",
+            "savefig.edgecolor": "white",
+            "figure.autolayout": True,
+            "axes.facecolor": "white",
+            "axes.edgecolor": "black",
+            "axes.linewidth": 1.2,
+            "axes.labelcolor": "black",
+            "axes.labelsize": 20,
+            "axes.titlesize": 20,
+            "axes.titlecolor": "black",
+            "axes.spines.top": True,
+            "axes.spines.right": True,
+            "axes.grid": True,
+            "grid.color": "black",
             "grid.linewidth": 0.4,
             "grid.alpha": 0.8,
-            "xtick.color": "white",
-            "ytick.color": "white",
-            "xtick.labelcolor": "white",
-            "ytick.labelcolor": "white",
-            "lines.color": "white",
+            "xtick.top": True,
+            "ytick.right": True,
+            "xtick.direction": "in",
+            "ytick.direction": "in",
+            "xtick.major.size": 6,
+            "ytick.major.size": 6,
+            "xtick.major.width": 1.2,
+            "ytick.major.width": 1.2,
+            "xtick.minor.visible": True,
+            "ytick.minor.visible": True,
+            "xtick.minor.size": 3,
+            "ytick.minor.size": 3,
+            "xtick.minor.width": 1,
+            "ytick.minor.width": 1,
+            "xtick.color": "black",
+            "ytick.color": "black",
+            "xtick.labelcolor": "black",
+            "ytick.labelcolor": "black",
+            "xtick.labelsize": 16,
+            "ytick.labelsize": 16,
+            "xtick.minor.ndivs": 5,
+            "ytick.minor.ndivs": 5,
+            "lines.linewidth": 1.5,
+            "lines.markersize": 5,
+            "lines.color": "black",
             "mathtext.default": "regular",
-            "legend.labelcolor": "white",
-            "legend.facecolor": "black",
-            "legend.edgecolor": "white",
+            "legend.frameon": True,
+            "legend.fontsize": 12,
+            "legend.handlelength": 2,
+            "legend.labelcolor": "black",
+            "legend.facecolor": "white",
+            "legend.edgecolor": "black",
+            "legend.fancybox": True,
+            "legend.framealpha": 1.0,
         }
     )
-    c = "gainsboro"
-    edgecolors = "w"
-    c1 = "lime"
-    c2 = "cyan"
 
-# if "xdata" not in locals() and "ydata" not in locals():
-#     xdata = np.arange(-3 * np.pi, 3 * np.pi, 0.05)
-#     ydata = np.sin(-0.5 * xdata) + np.random.normal(0, 0.15, len(xdata))
+    c = "k"
+    edgecolors = "gainsboro"
+    c1 = "dodgerblue"
+    c2 = "orangered"
 
-if "xdata" in locals() and "ydata" in locals():
+    if darkmode:
+        mpl.rcParams.update(
+            {
+                "figure.facecolor": "black",
+                "figure.edgecolor": "black",
+                "savefig.facecolor": "black",
+                "savefig.edgecolor": "black",
+                "axes.facecolor": "black",
+                "axes.edgecolor": "white",
+                "axes.labelcolor": "white",
+                "axes.titlecolor": "white",
+                "grid.color": "snow",
+                "grid.linewidth": 0.4,
+                "grid.alpha": 0.8,
+                "xtick.color": "white",
+                "ytick.color": "white",
+                "xtick.labelcolor": "white",
+                "ytick.labelcolor": "white",
+                "lines.color": "white",
+                "mathtext.default": "regular",
+                "legend.labelcolor": "white",
+                "legend.facecolor": "black",
+                "legend.edgecolor": "white",
+            }
+        )
+        c = "gainsboro"
+        edgecolors = "w"
+        c1 = "lime"
+        c2 = "cyan"
 
     fig, ax = plt.subplots(figsize=(8, 6))
     ax.scatter(xdata, ydata, s=100, c=c, edgecolors=edgecolors, lw=3)
