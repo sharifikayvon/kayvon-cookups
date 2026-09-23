@@ -86,9 +86,7 @@ mode = st.radio(
 
 
 if mode == "upload data file":
-    uploaded_file = st.file_uploader(
-        "upload a data file", type=["csv", "txt", "xlsx"]
-    )
+    uploaded_file = st.file_uploader("upload a data file", type=["csv", "txt", "xlsx"])
 
     if uploaded_file is not None:
 
@@ -254,8 +252,8 @@ if darkmode:
     c2 = "cyan"
 
 if "xdata" not in locals() and "ydata" not in locals():
-    xdata = np.arange(-3 * np.pi, 3 * np.pi, 0.05)
-    ydata = np.sin(-0.5 * xdata) + np.random.normal(0, 0.15, len(xdata))
+    xdata = np.empty(1)  # np.arange(-3 * np.pi, 3 * np.pi, 0.05)
+    ydata = np.empty(1)  # np.sin(-0.5 * xdata) + np.random.normal(0, 0.15, len(xdata))
 
 
 fig, ax = plt.subplots(figsize=(8, 6))
@@ -291,6 +289,7 @@ if fitline and has_valid_xy(xdata, ydata):
 
     ax.plot(lin_xfit, lin_yfit, color=c1, linestyle="solid", label=lin_label, lw=3)
     ax.legend()
+
 elif fitline:
     st.warning("cannot fit line: data is empty or invalid")
 
@@ -301,6 +300,7 @@ if fitquad and has_valid_xy(xdata, ydata):
     quad_label = rf"$quadratic\ fit:\ y = {fmt_poly(quad_coeffs, ['x^2','x',''])}$"
     ax.plot(quad_xfit, quad_yfit, color=c2, linestyle="dashed", label=quad_label, lw=3)
     ax.legend()
+
 elif fitquad:
     st.warning("cannot fit parabola: data is empty or invalid")
 

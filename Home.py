@@ -1,6 +1,11 @@
 import streamlit as st
 
-st.set_page_config(page_title="kayvon-cookups", page_icon="👨‍🍳", layout="wide")
+st.set_page_config(
+    page_title="kayvon-cookups",
+    page_icon="👨‍🍳",
+    layout="wide",
+    initial_sidebar_state="expanded",
+)
 st.markdown(
     "<h1 style='text-align: center'>Kayvon's Web App Repository</h1>",
     unsafe_allow_html=True,
