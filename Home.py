@@ -15,7 +15,7 @@ st.markdown("""
 Welcome to my collection of web apps 🤠 !
 
 Features include:
-- **Graph and Fit your Data**: Make a scatter plot of your data and fit a linear, quadratic, or user-specified function.
+- **Graph and Fit your Data**: Make a scatter plot of your data, specify a model, and fit.
 - **Photos to Spectra**: Upload a photo and see it reimagined as a spectrum of light.
 - **Visualize 1D Motion**: Define **x(t)**, **v(t)**, or **a(t)** and visualize all three simultaneously.
 
